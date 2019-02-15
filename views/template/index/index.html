@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>拓线</title>
+	
+	<script type="text/javascript" src="/static/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+	
+	<link href='/static/bootstrap/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+	<script type="text/javascript" src="/static/datetimepicker/js/bootstrap-datetimepicker.js"></script>
+	
+	<script type="text/javascript" src="/static/datetimepicker/js/moment.min.js"></script>
+	<link href='/static/datetimepicker/css/bootstrap-datetimepicker.min.css' rel='stylesheet' type='text/css'>
+	<!--base -->
+	<link href='/static/main.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div class="row">
+    <div id="left" class="col-md-12 col-sm-12 col-xs-12">
+		<div class="content">
+			<div class="col-md-4 col-sm-6 col-xs-12 input">
+				<div class="col-md-12 col-sm-12 col-xs-12 radio">
+					&nbsp;&nbsp;&nbsp;
+					<label>
+						<input type="radio" name="url" value="" checked=checked/>平台1
+					</label>
+					<label>
+						<input type="radio" name="url" value="" />平台2
+					</label>
+					<label>
+						<input type="radio" name="url" value="" />平台3
+					</label>
+				</div>
+				<div class="col-md-12 col-sm-12 col-xs-12 input">
+				  <div class="col-md-12 col-sm-12 col-xs-12">
+					<label>
+						<input class="form-control" type="text" id="startDate" data-date-format="yyyy-MM-dd 00:00:00" value="2018-01-01 00:00:00"/>
+					</label>
+					<label>
+						<input class="form-control" type="text" id="endDate" data-date-format="yyyy-MM-dd 00:00:00" value="2018-12-01 00:00:00"/>
+					</label>
+					<label>
+						<select id="fastDate" class="form-control">
+							<option value="3">最近三月</option>
+							<option value="6">最近半年</option>
+							<option value="1">最近一年</option>
+							<option value="2">最近两年</option>
+						</select>
+					</label>
+				  </div>
+				  <div class="col-md-12 col-sm-12 col-xs-12">
+					<label>
+						<input type="button" onclick="submit()" class="found btn btn-default" value="查询" />
+					</label>
+					<label >
+						<input type="button" onclick="expFull()" class="btn btn-default" value="导出" />
+					</label>
+				   </div>
+				</div>
+			</div>
+			<div class="col-md-8 col-sm-6 col-xs-12" style="height:100%;">
+				<div class="col-md-12 col-sm-12 col-xs-12 radio" >
+					<label>
+						<input type="radio" name="type" value="ip" checked=checked/>IP地址
+					</label>
+					<label>
+						<input type="radio" name="type" value="domain" />域名
+					</label>
+					<label>
+						<input type="radio" name="type" value="md5" />文件md5
+					</label>
+					<label>
+						<input type="radio" name="type" value="mail" />mail
+					</label>
+					<label>
+						<input type="radio" name="type" value="host" disabled=disabled/>URL-HOST
+					</label>
+					<textarea id="sendData" class="form-control" style="width: 100%; height:100px;" placeholder="一行为一条数据"></textarea>
+				</div>
+			</div>
+		</div>
+	</div> 
+
+    <div id="right" class="col-md-12 col-sm-12 col-xs-12">
+		<div class="table-responsive">
+		  <table id="result" class="table table-hover">
+		    <tr>
+			  <td class="active">ID</td>
+			  <td class="success">平台</td>
+			  <td class="warning">查询数据</td>
+			  <td class="danger">查询结果</td>
+			  <td class="info">操作</td>
+			</tr>
+		  </table>
+		</div>
+	</div>
+
+</div>
+
+<script type="text/javascript" src="/static/jsonTcsv.js"></script>
+<script>
+var jsonResult = {}
+$(function(){
+	nowDate = moment().subtract(5, 'seconds')
+	startDate = moment().subtract(3, 'months')
+	$("#startDate").attr("value",startDate.format("YYYY-MM-DD HH:mm:ss"))
+	$("#endDate").attr("value",nowDate.format("YYYY-MM-DD HH:mm:ss"))
+		
+	$("#startDate").datetimepicker({
+        language: 'cn',
+		locale: moment.locale('cn'),
+        format: 'yyyy-mm-dd 00:00:00',
+        minView: "month",
+		todayHighlight: 1,
+        autoclose: true
+    });
+	$("#endDate").datetimepicker({
+        language: 'cn',
+		locale: moment.locale('cn'),
+        format: 'yyyy-mm-dd 00:00:00',
+        minView: "month",
+		todayHighlight: 1,
+        autoclose: true
+    });
+})
+
+
+
+function submit(){
+	send = $("#sendData").val();
+	if ($.trim(send)){
+		$(".found").attr({"disabled":"disabled"});
+		$(".found").val("正在查询...")
+	}else{
+		alert('请填写内容');
+		return false;
+	}
+	$("#result tr:gt(0)").remove();
+	pt = $("input[name='url']:checked").val()
+	type = $("input[name=type]:checked").val()
+
+	send = send.replace(/(\n)+/g,"\n")
+	sendList = send.split("\n")
+
+	startDate = ""
+	endDate = ""
+
+	startDate = $('#startDate')[0].value ? $('#startDate')[0].value : "2018-01-01 00:00:00"
+	endDate = $('#endDate')[0].value ? $('#endDate')[0].value : "2018-12-30 00:00:00"
+	
+	}
+	
+	for(i in sendList){
+		PostResq(pt, type, sendList[i], startDate, endDate)
+	}
+	setTimeout(clearDis(), 3000)
+}
+clearDis = function(){
+	$(".found").val("查询")
+	$(".found").removeAttr("disabled");
+}
+function PostResq(pt, type, data, startDate, endDate){
+	var newRow = "<tr>\
+		<td class='active'>"+($("#result tr").length)+"</td>\
+		<td class='success'>"+pt+"</td>\
+		<td class='warning'>"+data+"</td>\
+		<td class='danger'  name='"+data+"'>正在查询...</td>\
+		<td class='info'><a href='#' onclick='exp(\""+data+"\")' class='button'>下载</a></td>\
+		</tr>";
+	$("#result tr:last").after(newRow);	
+	$.ajax({
+		type: "POST",
+		url: "/q/"+ pt + "/" + type,
+		data: "data=" + data +"&startDate=" + startDate +"&endDate=" + endDate + "&type=" + type,
+		success: function(rspdata){
+			jsonResult[data] = rspdata
+			$("td[name='"+data+"']").text("查询成功,共"+rspdata.data.length)
+		
+			clearDis()
+		},
+		error: function(err){
+			$("td[name='"+data+"']").text(err)
+			clearDis()
+		}
+	});
+}
+
+
+function exp(str){
+	RespJson = jsonResult[str]
+	
+	if(!$.trim(RespJson)){
+		alert("无导出内容!")
+		return false
+	}
+
+	JSONToCSVConvertor(RespJson,"data_utf8",true)
+}
+
+$("#fastDate").change(function(){
+	fdate = $(this).val()
+	nowDate = moment().subtract(5, 'seconds')
+	startDate = ""
+	switch (fdate){
+		case "1":
+			startDate = moment().subtract(1, 'years')
+			break;
+		case "2":
+			startDate = moment().subtract(2, 'years')
+			break;
+		case "3":
+			startDate = moment().subtract(3, 'months')
+			break;
+		case "6":
+			startDate = moment().subtract(6, 'months')
+			break;
+		default:
+			alert('He He ! 😀')
+			break;
+	}
+	$("#startDate").attr("value",startDate.format("YYYY-MM-DD HH:mm:ss"))
+	$("#endDate").attr("value",nowDate.format("YYYY-MM-DD HH:mm:ss"))
+})
+
+</script>
+</body>
+</html>
