@@ -14,8 +14,5 @@ func Init() map[string]Base {
 	return map[string]Base{
 		"threatbook": NewTT(),
 		"virustotal": NewVirus(),
-		"ad":         NewAD(),
-		"nd":         NewND(),
-		"tm":         NewTM(),
 	}
 }

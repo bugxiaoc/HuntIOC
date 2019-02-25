@@ -15,9 +15,9 @@ type Virustotal struct {
 
 func NewVirus() *Virustotal {
 	return &Virustotal{
-		Name:    "Virustotal",
-		ApiPath: "www.virustotal.com/vtapi/v2/",
-		ApiKey:  "",
+		Name:    "virustotal",
+		ApiPath: "http://www.virustotal.com/vtapi/v2",
+		ApiKey:  tools.GetPlatform("virustotal"),
 	}
 }
 
@@ -47,14 +47,20 @@ func (ad Virustotal) Query(c *gin.Context) {
 		c.String(200, "{\"status\":\"00001\",\"msg\":\"该平台无法查询此参数.\"}")
 	}
 
-	body, status, err := tools.SendHttp(Method, ad.ApiPath, &arg, nil)
+	body, status, Err := tools.SendHttp(Method, ad.ApiPath, &arg, nil)
+
 	if status == 204 {
 		c.String(200, "{\"status\":\"00001\",\"msg\":\"超出请求率限制.\"}")
 	} else if status == 400 {
 		c.String(200, "{\"status\":\"00001\",\"msg\":\"请求参数错误.\"}")
-	} else if status == 43 {
+	} else if status == 403 {
 		c.String(200, "{\"status\":\"00001\",\"msg\":\"权限不足.\"}")
+	} else if status == 500 {
+		c.String(200, "{\"status\":\"00001\",\"msg\":\""+Err.Error()+"")
 	} else {
-		c.String(200, string(body))
+		tmPath := tools.WriteFile(data+"-"+ad.Name, body)
+		c.String(200, tmPath)
 	}
 }
+
+

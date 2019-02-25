@@ -4,7 +4,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func SendHttp(method string, URI string, arg *fasthttp.Args, cookies map[string]interface{}) ([]byte, int, error) {
+func SendHttp(method, URI string, arg *fasthttp.Args, cookies map[string]interface{}) ([]byte, int, error) {
 	req := &fasthttp.Request{}
 	switch method {
 	case "GET":
@@ -14,6 +14,7 @@ func SendHttp(method string, URI string, arg *fasthttp.Args, cookies map[string]
 		req.Header.SetMethod(method)
 		arg.WriteTo(req.BodyWriter())
 	}
+	LogInfo.Println("Query [Arg]:", arg.String())
 	if cookies != nil {
 		for key, v := range cookies {
 			req.Header.SetCookie(key, v.(string))

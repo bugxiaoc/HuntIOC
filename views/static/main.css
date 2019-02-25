@@ -19,30 +19,3 @@ html,body {
     height: 100%;
     width:100%
 }
-
-.radios > span{
-	padding:0px 30px 0px 0px;
-}
-.row {
-	height:100%;
-	
-	border:1px solid
-}
-#left{
-}
-
-#right {
-	height:100%;
-	width:100%;
-}
-#json{
-	height:100%;
-	width:100%;
-}
-
-.tWidth{ 
-	width:15%; 
-	text-overflow:ellipsis; 
-	overflow:hidden; 
-	white-space:nowrap; 
-}

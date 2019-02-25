@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin@123"
+    }
+  ],
+  "platform": [
+    {
+      "name": "threatbook",
+      "val": ""
+    },
+    {
+      "name": "virustotal",
+      "val": ""
+    },
+    {
+      "name": "limit",
+      "val": "500"
+    }
+  ]
+}

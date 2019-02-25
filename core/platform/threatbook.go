@@ -13,16 +13,16 @@ type Threatbook struct {
 	ApiKey  string
 }
 
-func NewVirus() *Threatbook {
+func NewTT() *Threatbook {
 	return &Threatbook{
 		Name:    "threatbook",
-		ApiPath: "https://x.threatbook.cn/api",
-		ApiKey:  "",
+		ApiPath: "https://x.threatbook.cn/api/v1",
+		ApiKey:  tools.GetPlatform("threatbook"),
 	}
 }
 
 func (ad Threatbook) Query(c *gin.Context) {
-	Method := "GET"
+	Method := "POST"
 	types := c.Param("type")
 	data := c.PostForm("data")
 	var arg fasthttp.Args
@@ -53,12 +53,11 @@ func (ad Threatbook) Query(c *gin.Context) {
 	}
 
 	body, status, err := tools.SendHttp(Method, ad.ApiPath, &arg, nil)
-	if status == 204 {
-		c.String(200, "{\"status\":\"00001\",\"msg\":\"超出请求率限制.\"}")
-	} else if status == 400 {
-		c.String(200, "{\"status\":\"00001\",\"msg\":\"请求参数错误.\"}")
-	} else if status == 43 {
-		c.String(200, "{\"status\":\"00001\",\"msg\":\"权限不足.\"}")
+	if status == 200 {
+		tmPath := tools.WriteFile(data+"-"+ad.Name, body)
+		c.String(200, tmPath)
+	} else if status == 500 {
+		c.String(200, "{\"status\":\"00001\",\"msg\":\""+err.Error()+"\"}")
 	} else {
 		c.String(200, string(body))
 	}
